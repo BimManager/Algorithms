@@ -71,8 +71,8 @@ namespace Sorting
 			*(pArr + i + j) = *(pArrRight + j);
 			++j;
 		}
-		free(pArrLeft);
 		free(pArrRight);
+		free(pArrLeft);
 	}
 	
 	void mergesort(double* pArr, int p, int r)
@@ -87,3 +87,34 @@ namespace Sorting
 		}
 	}
 } // Sorting 
+
+
+namespace Searching
+{
+	// Binary search
+	int binsrc(double* pArrBeg, double* pArrEnd, double val)
+	{
+		static double* pFirst = pArrBeg;
+		int mid = (pArrEnd - pArrBeg) / 2;
+		
+		if ((pArrEnd - pArrBeg) == 1 && 
+					*pArrBeg != val && *pArrEnd != val)
+		{
+			return -1;
+		}
+		
+		if (*(pArrBeg + mid) == val)
+		{
+			return (pArrBeg + mid) - pFirst;
+		}
+		else if (val > *(pArrBeg + mid))
+		{
+			return binsrc((pArrBeg + mid), pArrEnd, val);
+		}
+		else
+		{
+			return binsrc(pArrBeg, (pArrEnd - mid), val);
+		}
+	}
+	
+} // Searching 

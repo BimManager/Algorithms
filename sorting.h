@@ -14,4 +14,10 @@ namespace Sorting
 	void merge(double*, int, int, int);
 	void mergesort(double*, int, int);
 } // Sorting
+
+namespace Searching
+{
+	// Binary search
+	int binsrc(double*, double*, double);
+} // Searchig
 #endif // SORTING_ALG_H

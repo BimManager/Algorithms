@@ -28,6 +28,24 @@ namespace Sorting
 		}
 	}
 	
+	void reinsort(double* pArrBeg, double* pArrEnd, double* pCurElem)
+	{
+		// To print out in-betweens 
+		static double* pFirst = pArrBeg;
+		Utils::PrintArr<double>(pFirst, pArrEnd);
+		
+		// Base case
+		if (pCurElem == pArrEnd)
+		{
+			return;
+		}
+		
+		merge(pArrBeg, 0, (pCurElem - pArrBeg - 1), (pCurElem - pArrBeg));
+		
+		// Recursive case
+		reinsort(pArrBeg, pArrEnd, ++pCurElem);
+	}
+	
 	void merge(double* pArr, int p, int q, int r)
 	{
 		register size_t i, j;
@@ -114,6 +132,33 @@ namespace Searching
 		else
 		{
 			return binsrc(pArrBeg, (pArrEnd - mid), val);
+		}
+	}
+	
+	int binmerge(double* pArrBeg, double* pArrEnd, double* pElem)
+	{
+		static double* pFirst = pArrBeg;
+		int mid = (pArrEnd - pArrBeg) / 2;
+		
+		if (*(pArrBeg + mid) == *pElem)
+		{
+			return (pArrBeg + mid) - pFirst;
+		}
+		else if (mid == 0 && *pElem > *(pArrBeg + mid))
+		{
+			return pArrBeg + 1 - pFirst;
+		}
+		else if (mid == 0 && *pElem < *(pArrBeg + mid))
+		{
+			return pArrBeg - pFirst;
+		}
+		else if (*pElem > *(pArrBeg + mid))
+		{
+			return binmerge((pArrBeg + mid), pArrEnd, pElem);
+		}
+		else
+		{
+			return binmerge(pArrBeg, (pArrEnd - mid), pElem);
 		}
 	}
 	

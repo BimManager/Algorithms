@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h> // memset, memcmp
 #include <wchar.h>
+#include <time.h>
 #include <math.h>
 
 // For the DES-based algorithm
@@ -14,6 +15,8 @@
 // The length of a password 5 characters at most
 #define PASSLEN 6
 #define SALTLEN 3
+#define LETTERS 52
+#define MAXPASSLEN 5
 
 /* --- Function Prototypes --- */
 void CrackDES(char*, char**);
@@ -24,8 +27,9 @@ void UnitTest();
 int main(int argc, char** argv)
 {
 	size_t i;
+	clock_t t;
 	char szBuffer[HASHLEN];
-	char* pszHash;
+	char* pszHash = NULL;
 	char* pszPassword;
 	memset(szBuffer, '\0', sizeof(szBuffer));
 	
@@ -40,13 +44,17 @@ int main(int argc, char** argv)
 	// Copy the content of argv[1] into szBuffer
 	strcpy(szBuffer, argv[1]);
 	
-	pszHash = crypt("efds", "XX");
+  pszHash = crypt("zzz", "XX");
+	//pszHash = crypt(argv[1], "50");
 	
 	printf("hash = %s;\n", pszHash);
 	
+	t = clock();
 	CrackDES(pszHash, &pszPassword);
+	t = clock() - t;
 	
 	printf("\nPASSWORD: %s\n", pszPassword);
+	printf("Time went by: %.4f\n", ((float)t) / CLOCKS_PER_SEC);
 	//UnitTest();
 	
 	return 0;
@@ -57,26 +65,18 @@ char GetChar(int i)
 {
 	char chOut;
 BEGIN:
-	if (i >= 0 && i < 26)
+	if (i < LETTERS / 2) 
 	{
 		chOut = 'A' + i;
 	}
-	else if (i >= 26 && i < 52)
+	else if (i < LETTERS)
 	{
-		chOut = 'a' + (i - 26);
+		chOut = 'a' + (i - LETTERS / 2);
 	}
 	else
 	{
-		if (i > 0)
-		{
-			i -= 52;
+		i -= LETTERS;
 			goto BEGIN;
-		}
-		else
-		{
-			i += 52;
-			goto BEGIN;
-		}
 	}
 	return chOut;
 }
@@ -135,7 +135,7 @@ void UnitTest()
 
 void CrackDES(char* pszHash, char** ppPassOut)
 {
-	size_t i, j;
+	register size_t i, j;
 	char szSalt[SALTLEN];
 	char szPassGuess[PASSLEN];
 	char szHash[HASHLEN];
@@ -150,57 +150,82 @@ void CrackDES(char* pszHash, char** ppPassOut)
 	printf("Salt = %s\n" , szSalt);
 	strcpy(szHash, pszHash);
 	
-	for (i = 0; i < pow(52, 5); ++i)
+	puts("Cracking ... ");
+	for (i = 0; i < pow(LETTERS, MAXPASSLEN); ++i)
 	{
 		pszHashGuess = crypt(szPassGuess, szSalt);
-		// printf("guess = %s; hash = %s\n" , pszHashGuess, szHash);
 		
 		if (strcmp(szHash, pszHashGuess, HASHLEN) == 0)
 		{
 			break;
 		}
 		else
-		{
-			if (i / 52 == 0)
+		{			
+			if (i / LETTERS == 0)
 			{
-				szPassGuess[0] = GetChar(i);
-				printf("%s\n" , szPassGuess);
+				*szPassGuess = GetChar(i);
 			}
-			else if (i / (52 * 52) == 0)
+			else if (i / (LETTERS * LETTERS) == 0)
 			{
-				szPassGuess[0] = GetChar(i / 52);
-				szPassGuess[1] = GetChar(i % 52);
-				printf("%s\n" , szPassGuess);
+				*szPassGuess = GetChar(i / LETTERS);
+				*(szPassGuess + 1) = GetChar(i % LETTERS);
 			}
-			else if (i / (52 * 52 * 52) == 0)
+			else if (i / (LETTERS * LETTERS * LETTERS) == 0)
 			{
-				szPassGuess[0] = GetChar(i / 52 / 52);
-				szPassGuess[1] = GetChar(i / 52);
-				szPassGuess[2] = GetChar(i % 52);
-				printf("%s\n" , szPassGuess);
+				szPassGuess[0] = GetChar(i / LETTERS / LETTERS);
+				szPassGuess[1] = GetChar(i / LETTERS);
+				szPassGuess[2] = GetChar(i % LETTERS);
 			}
-			else if (i / (52 * 52 * 52 * 52) == 0)
+			else if (i / (LETTERS * LETTERS * LETTERS * LETTERS) == 0)
 			{
-				szPassGuess[0] = GetChar(i / 52 / 52 / 52);
-				szPassGuess[1] = GetChar(i / 52 / 52);
-				szPassGuess[2] = GetChar(i / 52);
-				szPassGuess[3] = GetChar(i % 52);
-				printf("%s\n" , szPassGuess);
+				szPassGuess[0] = GetChar(i / LETTERS / LETTERS / LETTERS);
+				szPassGuess[1] = GetChar(i / LETTERS / LETTERS);
+				szPassGuess[2] = GetChar(i / LETTERS);
+				szPassGuess[3] = GetChar(i % LETTERS);
 			}
 			else
 			{	
-				szPassGuess[0] = GetChar(i / 52 / 52 / 52 / 52);
-				szPassGuess[1] = GetChar(i / 52 / 52 / 52);
-				szPassGuess[2] = GetChar(i / 52 / 52);
-				szPassGuess[3] = GetChar(i / 52);
-				szPassGuess[4] = GetChar(i % 52);
-				printf("%s\n" , szPassGuess);
+				szPassGuess[0] = GetChar(i / LETTERS / LETTERS / LETTERS / LETTERS);
+				szPassGuess[1] = GetChar(i / LETTERS / LETTERS / LETTERS);
+				szPassGuess[2] = GetChar(i / LETTERS / LETTERS);
+				szPassGuess[3] = GetChar(i / LETTERS);
+				szPassGuess[4] = GetChar(i % LETTERS);
 			}
 		}
 	}
 	
-	// If the password cracked, then copy it 
+	// If the password has been cracked, then copy it 
 	// into pszPass
 	strcpy(pszPass, szPassGuess);
 	*ppPassOut = pszPass;
 }
+
+
+/*
+char GetChar(int i)
+{
+	char chOut;
+BEGIN:
+	if (i >= 0 && i < 26) 
+	{
+		chOut = 'A' + i;
+	}
+	else if (i >= 26 && i < 52)
+	{
+		chOut = 'a' + (i - 26);
+	}
+	else
+	{
+		if (i > 0)
+		{
+			i -= 52;
+			goto BEGIN;
+		}
+		else
+		{
+			i += 52;
+			goto BEGIN;
+		}
+	}
+	return chOut;
+}*/

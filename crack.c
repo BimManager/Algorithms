@@ -44,18 +44,20 @@ int main(int argc, char** argv)
 	// Copy the content of argv[1] into szBuffer
 	strcpy(szBuffer, argv[1]);
 	
-  pszHash = crypt("zzz", "XX");
+  //pszHash = crypt("zzzz", "XX");
 	//pszHash = crypt(argv[1], "50");
 	
-	printf("hash = %s;\n", pszHash);
+	//printf("hash = %s;\n", pszHash);
 	
 	t = clock();
-	CrackDES(pszHash, &pszPassword);
+	CrackDES(argv[1], &pszPassword);
 	t = clock() - t;
 	
 	printf("\nPASSWORD: %s\n", pszPassword);
 	printf("Time went by: %.4f\n", ((float)t) / CLOCKS_PER_SEC);
 	//UnitTest();
+	
+	free(pszPassword);
 	
 	return 0;
 }
@@ -141,6 +143,12 @@ void CrackDES(char* pszHash, char** ppPassOut)
 	char szHash[HASHLEN];
 	char* pszHashGuess = NULL;
 	char* pszPass = calloc(PASSLEN, sizeof(char));
+	
+	if (pszPass == NULL)
+	{
+		fputs("No memory has been allocated. Exiting ... ", stderr);
+		return;
+	}
 	
 	// Initiliase a few arrays
 	memset(szPassGuess, '\0', PASSLEN);

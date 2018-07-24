@@ -15,6 +15,9 @@ namespace Sorting
 	// Merge sort
 	void merge(double*, int, int, int);
 	void mergesort(double*, int, int);
+	
+	// Quick sort
+	void quicksort(double*, double*);
 } // Sorting
 
 namespace Searching

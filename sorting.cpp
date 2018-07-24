@@ -6,6 +6,7 @@
 #include <cstring>
 
 #include "sorting.h"
+#include "utils.h"
 
 #define SWAP(t, a, b) { t c = a; \
 													a = b; \
@@ -103,6 +104,51 @@ namespace Sorting
 			mergesort(pArr, q + 1, r);
 			merge(pArr, p, q, r);
 		}
+	}
+	
+	void quicksort(double* pBeg, double* pEnd)
+	{
+		// -- Base case -- //
+		if (pEnd - pBeg < 2)
+		{
+			return;
+		}
+		else if (pEnd - pBeg == 2)
+		{
+			if (*pBeg > *(pBeg + 1))
+			{
+				SWAP(double, *pBeg, *(pBeg + 1));
+			}
+		}
+		
+		// -- Recursive case -- //
+		size_t i, last, size;
+		size = pEnd - pBeg;
+		size_t pivIndex = size / 2;
+		
+		std::printf("pivot = %d\n", pivIndex);
+		
+		// Pick a pivot
+		SWAP(double, *pBeg, *(pBeg + pivIndex));
+		
+		// Break up the array into two sub-arrays:
+		// with elements less than the pivot
+		// and elements larger than it
+		for (i = 1, last = 0; i < size; ++i)
+		{
+			if (*pBeg > *(pBeg + i))
+			{
+				++last;
+				SWAP(double, *(pBeg + last), *(pBeg + i));
+				Printing::PrintArr(pBeg, pEnd);
+				std::printf("last = %d\n", last);
+			}
+		}
+		SWAP(double, *pBeg, *(pBeg + last));
+		
+		// Recursively sort the two sub-arrays
+		quicksort(pBeg, pBeg + last);
+		quicksort(pBeg + last + 1, pEnd);
 	}
 } // Sorting 
 

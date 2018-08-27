@@ -6,21 +6,73 @@
 
 #include <iostream>
 
-#include <iostream>
-
-
 #define SWAP(t, a, b) { t c = a; \
 					      a = b; \
-						  b = c; \
-					   }
+						  b = c; }
 
 namespace Sorting 
 {
+	enum SortingOrder { ASCENDING, DESCENDING };
 	template<class T>
 	struct IComparer
 	{
 		virtual int operator()(T*, T*) = 0;
+		SortingOrder order;
 	};
+	
+	// Selection sort
+	template<class T>
+	void SelSort(T* pBeg, T* pEnd, IComparer<T>* pCmpr)
+	{
+		size_t i, j, size = pEnd - pBeg;
+		
+		for (i = 0; i < size - 1; ++i)
+		{
+			size_t min = i;
+			
+			for (j = i + 1; j < size; ++j)
+			{
+				if ((*pCmpr)(pBeg + min, pBeg + j) == 1 &&
+					pCmpr->order == SortingOrder::ASCENDING)
+				{
+					min = j;
+				}
+				else if ((*pCmpr)(pBeg + min, pBeg + j) == -1 &&
+					pCmpr->order == SortingOrder::DESCENDING)
+				{
+					min = j;
+				}
+			}
+			SWAP(T, *(pBeg + i), *(pBeg + min));
+		}
+	}
+	
+	// Insertion sort
+	template<class T>
+	void InSort(T* pBeg, T* pEnd, IComparer<T>* pCmpr)
+	{
+		size_t i, j, size = pEnd - pBeg;
+		for (i = 0; i < size - 1; ++i)
+		{
+			j = i + 1;
+			if (pCmpr->order == SortingOrder::ASCENDING)
+			{
+				while (j > 0 && (*pCmpr)(pBeg + j - 1, pBeg + j) == 1)
+				{
+					SWAP(T, *(pBeg + j - 1), *(pBeg + j));
+					--j;
+				}
+			}
+			else
+			{
+				while (j > 0 && (*pCmpr)(pBeg + j - 1, pBeg + j) == -1)
+				{
+					SWAP(T, *(pBeg + j - 1), *(pBeg + j));
+					--j;
+				}
+			}
+		}
+	}
 	
 	// Insertion sort
 	void insort(double*, size_t);

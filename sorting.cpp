@@ -126,8 +126,6 @@ namespace Sorting
 		size = pEnd - pBeg;
 		size_t pivIndex = size / 2;
 		
-		std::printf("pivot = %d\n", pivIndex);
-		
 		// Pick a pivot
 		SWAP(double, *pBeg, *(pBeg + pivIndex));
 		
@@ -141,7 +139,6 @@ namespace Sorting
 				++last;
 				SWAP(double, *(pBeg + last), *(pBeg + i));
 				Printing::PrintArr(pBeg, pEnd);
-				std::printf("last = %d\n", last);
 			}
 		}
 		SWAP(double, *pBeg, *(pBeg + last));

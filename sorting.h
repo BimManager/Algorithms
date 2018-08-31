@@ -4,6 +4,8 @@
 #ifndef SORTING_ALG_H
 #define SORTING_ALG_H
 
+#include <cstring>
+
 #include <iostream>
 
 #define SWAP(t, a, b) { t c = a; \
@@ -18,6 +20,12 @@ namespace Sorting
 	{
 		virtual int operator()(T*, T*) = 0;
 		SortingOrder order;
+	};
+	
+	struct KeyValuePair
+	{
+		int key;
+		int value;
 	};
 	
 	// Selection sort
@@ -72,6 +80,93 @@ namespace Sorting
 				}
 			}
 		}
+	}
+	
+	// Bubble sort
+	template<class T>
+	void BubbleSort(T* pBeg, T* pEnd, IComparer<T>* pCmpr)
+	{
+		size_t i, j, swap, size = pEnd - pBeg;
+		
+		do
+		{
+			swap = 0;
+			for (i = 0; i < size - 1; ++i)
+			{
+				j = i + 1;
+				
+				if ((*pCmpr)(pBeg + i, pBeg + j) == 1 && 
+					pCmpr->order == SortingOrder::ASCENDING)
+					{
+						SWAP(T, *(pBeg + i), *(pBeg + j));
+						++swap;
+					}
+				else if ((*pCmpr)(pBeg + i, pBeg + j) == -1 &&
+					pCmpr->order == SortingOrder::DESCENDING)
+					{
+						SWAP(T, *(pBeg + i), *(pBeg + j));
+						++swap;
+					}
+			}
+		} while (swap != 0);
+	}
+	
+	// Counting sort
+	void CountSort(int* pBeg, int* pEnd)
+	{
+		size_t i, size = pEnd - pBeg;
+		int min = *pBeg;
+		int max = *pBeg;
+		int dif;
+		int index;
+		
+		// Dig up (track down) 
+		// the maximum and minimum values
+		for (i = 1; i < size; ++i)
+		{
+			if (*(pBeg + i) > max)
+			{
+				max = *(pBeg + i);
+			}
+			else if (*(pBeg + i) < min)
+			{
+				min = *(pBeg + i);
+			}
+		}
+		dif = max - min + 1;
+		
+		std::cout << "(min, max, dif) = (" 
+				  << min << ", "
+				  << max << ", "
+				  << dif << ") "
+				  << '\n';
+		
+		int* pArr = new int[dif];
+		
+		// Zero the array
+		for (i = 0; i < dif; ++i)
+		{
+			*(pArr + i) = 0;
+		}
+		
+		// Fill up the array
+		for (i = 0; i < size; ++i)
+		{
+			index = *(pBeg + i) - min;
+			++*(pArr + index);
+		}
+		
+		// Sort out the original array
+		for (i = 0; i < dif; ++i)
+		{
+			while (*(pArr + i) > 0)
+			{
+				*pBeg++ = (i + min);
+				--*(pArr + i);
+			}
+		}
+		
+		delete[] pArr;
 	}
 	
 	// Insertion sort

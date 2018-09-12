@@ -106,6 +106,80 @@ namespace Sorting
 		}
 	}
 	
+	
+	void Merge(UINT64* pBeg, UINT64* pEnd)
+	{
+		size_t i = 0, j = 0;
+		size_t size = pEnd - pBeg;
+		size_t n1 = size / 2;
+		size_t n2 = size - n1;
+			
+		UINT64* lArr = new UINT64[n1];
+		UINT64* rArr = new UINT64[n2];
+		
+		while ((pBeg  + i + j) != pEnd)
+		{
+			if (i < n1)
+			{
+				*(lArr + i) = *(pBeg + i);
+				++i;
+			}
+			else
+			{
+				*(rArr + j) = *(pBeg + i + j);
+				++j;
+			}
+		}
+		for (i = 0, j = 0; i < n1 && j < n2;)
+		{
+			if (*(lArr + i) < *(rArr + j))
+			{
+				*(pBeg + i + j) = *(lArr + i);
+				++i;
+			}
+			else
+			{
+				*(pBeg + i + j) = *(rArr + j);
+				++j;
+			}
+		}
+		if (i < n1) 
+		{
+			while (i < n1)
+			{
+				*(pBeg + i + j) = *(lArr + i);
+				++i;
+			}
+		}
+		else
+		{
+			while (j < n2)
+			{
+				*(pBeg + i + j) = *(rArr + j);
+				++j;
+			}
+		}
+		delete[] lArr;
+		delete[] rArr;
+	}
+
+	void Mergesort(UINT64* pBeg, UINT64* pEnd)
+	{
+		Utils::PrintArr(pBeg, pEnd);
+		size_t size = pEnd - pBeg;
+		if (size == 1)
+		{
+			return;
+		}
+		else
+		{
+			Mergesort(pBeg, pBeg + size / 2);
+			Mergesort(pBeg + size / 2, pEnd);
+			Merge(pBeg, pEnd);
+			Utils::PrintArr(pBeg, pEnd);
+		}
+	}
+	
 	void quicksort(double* pBeg, double* pEnd)
 	{
 		// -- Base case -- //

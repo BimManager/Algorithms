@@ -1,188 +1,191 @@
-// sorting.cpp
+// sorting.h
 // Sorting algorithms
 
-#include <cstdlib>
-#include <cstdio>
+#ifndef SORTING_ALG_H
+#define SORTING_ALG_H
+
 #include <cstring>
 
-#include "sorting.h"
-#include "utils.h"
+#include <iostream>
 
 #define SWAP(t, a, b) { t c = a; \
-													a = b; \
-													b = c; \
-											}
+					      a = b; \
+						  b = c; }
 
-namespace Sorting
+namespace Sorting 
 {
-	void insort(double* pArr, size_t cElems)
+	enum SortingOrder { ASCENDING, DESCENDING };
+	template<class T>
+	struct IComparer
 	{
-		register size_t i, j;
-		for (i = 1; i < cElems; ++i)
-		{
-			j = i - 1;
-			while (j >= 0 && *(pArr + j) > *(pArr + j + 1))
-			{
-				SWAP(double, *(pArr + j), *(pArr + j + 1));
-				--j;
-			}
-		}
-	}
+		virtual int operator()(T*, T*) = 0;
+		SortingOrder order;
+	};
 	
-	void reinsort(double* pArrBeg, double* pArrEnd, double* pCurElem)
+	struct KeyValuePair
 	{
-		// To print out in-betweens 
-		static double* pFirst = pArrBeg;
-		Utils::PrintArr<double>(pFirst, pArrEnd);
+		int key;
+		int value;
+	};
+	
+	// Selection sort
+	template<class T>
+	void SelSort(T* pBeg, T* pEnd, IComparer<T>* pCmpr)
+	{
+		size_t i, j, size = pEnd - pBeg;
 		
-		// Base case
-		if (pCurElem == pArrEnd)
+		for (i = 0; i < size - 1; ++i)
 		{
-			return;
-		}
-		
-		merge(pArrBeg, 0, (pCurElem - pArrBeg - 1), (pCurElem - pArrBeg));
-		
-		// Recursive case
-		reinsort(pArrBeg, pArrEnd, ++pCurElem);
-	}
-	
-	void merge(double* pArr, int p, int q, int r)
-	{
-		register size_t i, j;
-		size_t n1, n2;
-		n1 = q - p + 1;
-		n2 = r - q;
-		double* pArrLeft = (double*)calloc((n1), sizeof(double));
-		std::memset(pArrLeft, 0, n1);
-		double* pArrRight = (double*)calloc((n2), sizeof(double));
-		std::memset(pArrRight, 0, n2);
-		for (i = 0; i < n1; ++i)
-		{
-			pArrLeft[i] = pArr[i];
-		}
-		for (j = 0; j < n2; ++j)
-		{
-			pArrRight[j] = pArr[i + j];
-		}
-		
-		i = 0; j = 0;
-		while (i < n1 && j < n2)
-		{
-			if(*(pArrLeft + i) <= *(pArrRight + j))
-			{
-				*(pArr + i + j) = *(pArrLeft + i);
-				++i;
-			}
-			else
-			{
-				*(pArr + i + j) = *(pArrRight + j);
-				++j;
-			}
-		}
-		while (i < n1)
-		{
-			*(pArr + i + j) = *(pArrLeft + i);
-			++i;
-		}
-		while (j < n2)
-		{
-			*(pArr + i + j) = *(pArrRight + j);
-			++j;
-		}
-		free(pArrRight);
-		free(pArrLeft);
-	}
-	
-	void mergesort(double* pArr, int p, int r)
-	{
-		int q;
-		if (p < r)
-		{
-			q = (p + r) / 2;
-			mergesort(pArr, p, q);
-			mergesort(pArr, q + 1, r);
-			merge(pArr, p, q, r);
-		}
-	}
-	
-	
-	void Merge(UINT64* pBeg, UINT64* pEnd)
-	{
-		size_t i = 0, j = 0;
-		size_t size = pEnd - pBeg;
-		size_t n1 = size / 2;
-		size_t n2 = size - n1;
+			size_t min = i;
 			
-		UINT64* lArr = new UINT64[n1];
-		UINT64* rArr = new UINT64[n2];
-		
-		while ((pBeg  + i + j) != pEnd)
-		{
-			if (i < n1)
+			for (j = i + 1; j < size; ++j)
 			{
-				*(lArr + i) = *(pBeg + i);
-				++i;
+				if ((*pCmpr)(pBeg + min, pBeg + j) == 1 &&
+					pCmpr->order == SortingOrder::ASCENDING)
+				{
+					min = j;
+				}
+				else if ((*pCmpr)(pBeg + min, pBeg + j) == -1 &&
+					pCmpr->order == SortingOrder::DESCENDING)
+				{
+					min = j;
+				}
 			}
-			else
-			{
-				*(rArr + j) = *(pBeg + i + j);
-				++j;
-			}
-		}
-		for (i = 0, j = 0; i < n1 && j < n2;)
-		{
-			if (*(lArr + i) < *(rArr + j))
-			{
-				*(pBeg + i + j) = *(lArr + i);
-				++i;
-			}
-			else
-			{
-				*(pBeg + i + j) = *(rArr + j);
-				++j;
-			}
-		}
-		if (i < n1) 
-		{
-			while (i < n1)
-			{
-				*(pBeg + i + j) = *(lArr + i);
-				++i;
-			}
-		}
-		else
-		{
-			while (j < n2)
-			{
-				*(pBeg + i + j) = *(rArr + j);
-				++j;
-			}
-		}
-		delete[] lArr;
-		delete[] rArr;
-	}
-
-	void Mergesort(UINT64* pBeg, UINT64* pEnd)
-	{
-		Utils::PrintArr(pBeg, pEnd);
-		size_t size = pEnd - pBeg;
-		if (size == 1)
-		{
-			return;
-		}
-		else
-		{
-			Mergesort(pBeg, pBeg + size / 2);
-			Mergesort(pBeg + size / 2, pEnd);
-			Merge(pBeg, pEnd);
-			Utils::PrintArr(pBeg, pEnd);
+			SWAP(T, *(pBeg + i), *(pBeg + min));
 		}
 	}
 	
-	void quicksort(double* pBeg, double* pEnd)
+	// Insertion sort
+	template<class T>
+	void InSort(T* pBeg, T* pEnd, IComparer<T>* pCmpr)
 	{
-		// -- Base case -- //
+		size_t i, j, size = pEnd - pBeg;
+		for (i = 0; i < size - 1; ++i)
+		{
+			j = i + 1;
+			if (pCmpr->order == SortingOrder::ASCENDING)
+			{
+				while (j > 0 && (*pCmpr)(pBeg + j - 1, pBeg + j) == 1)
+				{
+					SWAP(T, *(pBeg + j - 1), *(pBeg + j));
+					--j;
+				}
+			}
+			else
+			{
+				while (j > 0 && (*pCmpr)(pBeg + j - 1, pBeg + j) == -1)
+				{
+					SWAP(T, *(pBeg + j - 1), *(pBeg + j));
+					--j;
+				}
+			}
+		}
+	}
+	
+	// Bubble sort
+	template<class T>
+	void BubbleSort(T* pBeg, T* pEnd, IComparer<T>* pCmpr)
+	{
+		size_t i, j, swap, size = pEnd - pBeg;
+		
+		do
+		{
+			swap = 0;
+			for (i = 0; i < size - 1; ++i)
+			{
+				j = i + 1;
+				
+				if ((*pCmpr)(pBeg + i, pBeg + j) == 1 && 
+					pCmpr->order == SortingOrder::ASCENDING)
+					{
+						SWAP(T, *(pBeg + i), *(pBeg + j));
+						++swap;
+					}
+				else if ((*pCmpr)(pBeg + i, pBeg + j) == -1 &&
+					pCmpr->order == SortingOrder::DESCENDING)
+					{
+						SWAP(T, *(pBeg + i), *(pBeg + j));
+						++swap;
+					}
+			}
+		} while (swap != 0);
+	}
+	
+	// Counting sort
+	void CountSort(int* pBeg, int* pEnd)
+	{
+		size_t i, size = pEnd - pBeg;
+		int min = *pBeg;
+		int max = *pBeg;
+		int dif;
+		int index;
+		
+		// Dig up (track down) 
+		// the maximum and minimum values
+		for (i = 1; i < size; ++i)
+		{
+			if (*(pBeg + i) > max)
+			{
+				max = *(pBeg + i);
+			}
+			else if (*(pBeg + i) < min)
+			{
+				min = *(pBeg + i);
+			}
+		}
+		dif = max - min + 1;
+		
+		std::cout << "(min, max, dif) = (" 
+				  << min << ", "
+				  << max << ", "
+				  << dif << ") "
+				  << '\n';
+		
+		int* pArr = new int[dif];
+		
+		// Zero the array
+		for (i = 0; i < dif; ++i)
+		{
+			*(pArr + i) = 0;
+		}
+		
+		// Fill up the array
+		for (i = 0; i < size; ++i)
+		{
+			index = *(pBeg + i) - min;
+			++*(pArr + index);
+		}
+		
+		// Sort out the original array
+		for (i = 0; i < dif; ++i)
+		{
+			while (*(pArr + i) > 0)
+			{
+				*pBeg++ = (i + min);
+				--*(pArr + i);
+			}
+		}
+		
+		delete[] pArr;
+	}
+	
+	// Insertion sort
+	void insort(double*, size_t);
+	
+	// Recursive insertion sort
+	void reinsort(double*, double*, double*);
+	
+	// Merge sort
+	void merge(double*, int, int, int);
+	void mergesort(double*, int, int);
+	
+	// Quick sort
+	void quicksort(double*, double*);
+	
+	template<typename T>
+	void Qsort(T* pBeg, T* pEnd)
+	{
+		// Base case
 		if (pEnd - pBeg < 2)
 		{
 			return;
@@ -191,92 +194,92 @@ namespace Sorting
 		{
 			if (*pBeg > *(pBeg + 1))
 			{
-				SWAP(double, *pBeg, *(pBeg + 1));
+				SWAP(T, *pBeg, *(pBeg + 1));
 			}
+			return;
 		}
 		
-		// -- Recursive case -- //
+		// Recursive case
 		size_t i, last, size;
+		
+		// 1. Pick out a pivot
 		size = pEnd - pBeg;
-		size_t pivIndex = size / 2;
+		SWAP(T, *pBeg, *(pBeg + size / 2));
 		
-		// Pick a pivot
-		SWAP(double, *pBeg, *(pBeg + pivIndex));
-		
-		// Break up the array into two sub-arrays:
-		// with elements less than the pivot
-		// and elements larger than it
-		for (i = 1, last = 0; i < size; ++i)
+		// 2. Split up the array into two sub-arrays
+		for (last = 0, i = 1; i < size; ++i)
 		{
 			if (*pBeg > *(pBeg + i))
 			{
 				++last;
-				SWAP(double, *(pBeg + last), *(pBeg + i));
-				Printing::PrintArr(pBeg, pEnd);
+				SWAP(T, *(pBeg + i), *(pBeg + last));
 			}
 		}
-		SWAP(double, *pBeg, *(pBeg + last));
+		SWAP(T, *pBeg, *(pBeg + last));
 		
-		// Recursively sort the two sub-arrays
-		quicksort(pBeg, pBeg + last);
-		quicksort(pBeg + last + 1, pEnd);
+		// 3. Recursive sort the two sub-arrays
+		Qsort(pBeg, pBeg + last);
+		Qsort(pBeg + last + 1, pEnd);
 	}
-} // Sorting 
-
+	
+	template<typename T, class V>    
+	void UniQsort(T* pBeg, T* pEnd, IComparer<V>* pCmp)
+	{
+		// Base case
+		if (pEnd - pBeg < 2)
+		{
+			return;
+		}
+		else if (pEnd - pBeg == 2)
+		{
+			if ((*pCmp)(pBeg, pBeg + 1) == 1)
+			{
+				SWAP(T, *pBeg, *(pBeg + 1));
+			}
+			return;
+		}
+		
+		// Recursive case
+		size_t i, last, size;
+		// 1. Pick a pivot
+		size = pEnd - pBeg;
+		SWAP(T, *pBeg, *(pBeg + size / 2));
+		
+		// 2. Split the array into two sub-arrays
+		for (last = 0, i = 1; i < size; ++i)
+		{
+			if ((*pCmp)(pBeg, pBeg + i) == 1)
+			{
+				++last;
+				SWAP(T, *(pBeg + i), *(pBeg + last));
+			}
+		}
+		SWAP(T, *pBeg, *(pBeg + last));
+		
+		// 3. Recursively sort the two sub-arrays
+		UniQsort(pBeg, pBeg + last, pCmp);
+		UniQsort(pBeg + last + 1, pEnd, pCmp);
+	}
+} // Sorting
 
 namespace Searching
 {
 	// Binary search
-	int binsrc(double* pArrBeg, double* pArrEnd, double val)
+	int binsrc(double*, double*, double);
+	int binmerge(double*, double*, double*);
+} // Searchig
+
+namespace Utils
+{
+	// Print array
+	template<typename T>
+	void PrintArr(T* pBeg, T* pEnd)
 	{
-		static double* pFirst = pArrBeg;
-		int mid = (pArrEnd - pArrBeg) / 2;
-		
-		if ((pArrEnd - pArrBeg) == 1 && 
-					*pArrBeg != val && *pArrEnd != val)
+		while (pBeg != pEnd)
 		{
-			return -1;
+			std::cout << *pBeg++ << "; ";
 		}
-		
-		if (*(pArrBeg + mid) == val)
-		{
-			return (pArrBeg + mid) - pFirst;
-		}
-		else if (val > *(pArrBeg + mid))
-		{
-			return binsrc((pArrBeg + mid), pArrEnd, val);
-		}
-		else
-		{
-			return binsrc(pArrBeg, (pArrEnd - mid), val);
-		}
+		std::cout<<'\n';
 	}
-	
-	int binmerge(double* pArrBeg, double* pArrEnd, double* pElem)
-	{
-		static double* pFirst = pArrBeg;
-		int mid = (pArrEnd - pArrBeg) / 2;
-		
-		if (*(pArrBeg + mid) == *pElem)
-		{
-			return (pArrBeg + mid) - pFirst;
-		}
-		else if (mid == 0 && *pElem > *(pArrBeg + mid))
-		{
-			return pArrBeg + 1 - pFirst;
-		}
-		else if (mid == 0 && *pElem < *(pArrBeg + mid))
-		{
-			return pArrBeg - pFirst;
-		}
-		else if (*pElem > *(pArrBeg + mid))
-		{
-			return binmerge((pArrBeg + mid), pArrEnd, pElem);
-		}
-		else
-		{
-			return binmerge(pArrBeg, (pArrEnd - mid), pElem);
-		}
-	}
-	
-} // Searching 
+}
+#endif // SORTING_ALG_H

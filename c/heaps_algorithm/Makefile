@@ -2,7 +2,7 @@
 
 CC := gcc
 #CFLAGS := -Wall -Wextra -Werror -g -I../../libft/include -L../../libft -lft
-CFLAGS := -w -g -I../../libft/include -L../../libft -lft \
+CFLAGS := -w -g -I../../../libft/include -L../../../libft -lft \
 			 -fsanitize=address -O1 -fno-omit-frame-pointer
 
 SRCS := heaps.c

@@ -10,9 +10,13 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include <string.h>
+#include <stdio.h>
+#include <stddef.h>
 
-static void		tabput(int **arr, int r, int c)
+//#include "libft.h"
+
+/*static void		tabput(int **arr, int r, int c)
 {
 	int	i;
 	int	j;
@@ -58,7 +62,7 @@ static void	xgenerate(int *arr, int n, int k)
 			ft_swap(&arr[0], &arr[k - 1], sizeof(int));
 		xgenerate(arr, n, k - 1);
 	}
-}
+	}*/
 
 /*static void	_xgenerate(int **tab, int *arr, int n, int k)
 {
@@ -115,7 +119,7 @@ static void	xgenerate(int *arr, int n, int k)
 	return (ret);
 	}*/
 
-void	test_heaps(void)
+/*void	test_heaps(void)
 {
 //	int	arr[] = {1, 2, 3, 5};
 //	int	arr[] = {0, 1};
@@ -130,11 +134,48 @@ void	test_heaps(void)
 	ft_printf("r = %d; c = %d\n", r, c[0]);
 	tabput(res, r, c[0]);
 }
+*/
+static void	gswap(void *pv1, void *pv2, size_t n)
+{
+	char	tmp;
+
+	while (n--)
+	{
+		tmp = *((char *)pv1 + n);
+		*((char *)pv1 + n) = *((char *)pv2 + n);
+		*((char *)pv2 + n) = tmp;
+	}
+}
+
+
+static void	_generate(char *str, int k)
+{
+	int	i;
+	
+	if (1 == k)
+	{
+		printf("%s\n", str);
+		return ;
+	}
+	_generate(str, k - 1);
+	i = -1;
+	while (++i < k - 1)
+	{
+		if (k & 1)
+			gswap(&str[0], &str[k - 1], sizeof(char));
+		else
+			gswap(&str[i], &str[k - 1], sizeof(char));
+		_generate(str, k - 1);
+	}
+}
 
 int	main(int argc, char **argv)
 {
-	if (2 == argc)
+/*	if (2 == argc)
 		ft_printf("%lld\n", ft_fac(ft_atoi(argv[1])));
-	test_heaps();
-	return (EXIT_SUCCESS);
+		test_heaps();*/
+	char	str[] = "abc";
+
+	_generate(str, strlen(str));
+	return (0);
 }
